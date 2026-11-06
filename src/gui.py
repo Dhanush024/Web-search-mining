@@ -144,9 +144,17 @@ class SearchEngineGUI:
         right_box = tk.Frame(header_frame, bg=self.PRIMARY_COLOR)
         right_box.pack(side="right")
 
+        btn_inspect = ttk.Button(
+            right_box,
+            text="📊 Inspect Index",
+            style="Secondary.TButton",
+            command=self._show_index_inspector,
+        )
+        btn_inspect.pack(side="right", padx=5)
+
         btn_load = ttk.Button(
             right_box,
-            text="📁 Change Corpus Directory",
+            text="📁 Change Corpus",
             style="Secondary.TButton",
             command=self._choose_directory,
         )
@@ -477,6 +485,89 @@ class SearchEngineGUI:
 
         # Re-lock to read-only state
         self.result_text.config(state="disabled")
+
+    def _show_index_inspector(self) -> None:
+        """Opens a dialog window displaying index statistics, vocabulary, postings, and Permuterm rotations."""
+        inspector = tk.Toplevel(self.root)
+        inspector.title("Inverted Index & Vocabulary Inspector")
+        inspector.geometry("750x550")
+        inspector.minsize(600, 400)
+        inspector.configure(bg=self.BG_LIGHT)
+
+        # Header
+        top_frame = tk.Frame(inspector, bg=self.PRIMARY_COLOR, padx=16, pady=10)
+        top_frame.pack(fill="x")
+        ttk.Label(
+            top_frame,
+            text="📊 Inverted Index & Lexicon Inspector",
+            style="Header.TLabel",
+        ).pack(anchor="w")
+
+        stats = self.index.get_statistics()
+        sub_text = (
+            f"Total Documents: {stats['total_documents']}  |  "
+            f"Vocabulary Size: {stats['vocabulary_size']}  |  "
+            f"Total Postings: {stats['total_postings']}"
+        )
+        ttk.Label(top_frame, text=sub_text, style="SubHeader.TLabel").pack(anchor="w")
+
+        # Term lookup bar
+        lookup_frame = tk.Frame(inspector, bg=self.BG_LIGHT, padx=16, pady=10)
+        lookup_frame.pack(fill="x")
+
+        ttk.Label(lookup_frame, text="Lookup Vocabulary Term:", font=("Segoe UI", 10, "bold")).pack(side="left", padx=(0, 8))
+        term_var = tk.StringVar()
+        term_entry = tk.Entry(lookup_frame, textvariable=term_var, font=("Segoe UI", 10), width=25)
+        term_entry.pack(side="left", padx=(0, 8))
+
+        content_box = tk.Text(inspector, wrap="word", font=("Consolas", 10), padx=12, pady=10, relief="solid", bd=1)
+        content_box.pack(fill="both", expand=True, padx=16, pady=(0, 16))
+
+        def do_lookup(event=None):
+            term = term_var.get().strip().lower()
+            content_box.config(state="normal")
+            content_box.delete("1.0", tk.END)
+
+            if not term:
+                # Show top 50 vocabulary terms
+                vocab = sorted(self.index.get_vocabulary())
+                content_box.insert(tk.END, f"=== Vocabulary Sample (First 50 of {len(vocab)} terms) ===\n\n")
+                content_box.insert(tk.END, ", ".join(vocab[:50]) + ("..." if len(vocab) > 50 else "") + "\n\n")
+                content_box.insert(tk.END, "Type a term in the box above to inspect its postings list and Permuterm rotations.\n")
+                content_box.config(state="disabled")
+                return
+
+            postings = self.index.get_postings(term)
+            df = self.index.get_doc_frequency(term)
+
+            content_box.insert(tk.END, f"=== Term Details: '{term}' ===\n\n")
+            content_box.insert(tk.END, f"Document Frequency (DF) : {df}\n")
+
+            if not postings:
+                content_box.insert(tk.END, f"\nTerm '{term}' does not exist in the index.\n")
+            else:
+                content_box.insert(tk.END, "\nPostings List:\n")
+                for p in postings:
+                    doc = self.index.get_document(p.doc_id)
+                    title = doc.title if doc else f"Doc {p.doc_id}"
+                    content_box.insert(
+                        tk.END,
+                        f"  • Doc ID {p.doc_id} ('{title}'): Term Frequency = {p.tf}, Word Positions = {p.positions}\n"
+                    )
+
+            # Permuterm Rotations
+            augmented = term + "$"
+            content_box.insert(tk.END, f"\nPermuterm Cyclic Rotations for '{term}':\n")
+            for i in range(len(augmented)):
+                rot = augmented[i:] + augmented[:i]
+                content_box.insert(tk.END, f"  [{i+1}] {rot}\n")
+
+            content_box.config(state="disabled")
+
+        ttk.Button(lookup_frame, text="Lookup", style="Action.TButton", command=do_lookup).pack(side="left")
+        term_entry.bind("<Return>", do_lookup)
+        term_entry.focus_set()
+        do_lookup()
 
 
 def launch_gui(corpus_dir: Optional[str] = None) -> None:
