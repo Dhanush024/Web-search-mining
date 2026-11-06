@@ -68,6 +68,70 @@ def run_cli_search(corpus_dir: str, query: str, mode: str = "auto") -> None:
         print("-" * 60)
 
 
+def run_evaluation_benchmark(corpus_dir: str) -> None:
+    """Runs a standard Information Retrieval evaluation benchmark across test queries."""
+    from src.evaluator import Evaluator
+
+    loader = DocumentLoader()
+    tokenizer = Tokenizer()
+    normalizer = TextNormalizer()
+    index = InvertedIndex(tokenizer=tokenizer, normalizer=normalizer)
+    wildcard_proc = WildcardProcessor()
+    processor = QueryProcessor(
+        index=index,
+        tokenizer=tokenizer,
+        normalizer=normalizer,
+        wildcard_processor=wildcard_proc,
+    )
+
+    path = Path(corpus_dir).resolve()
+    print("=" * 70)
+    print("  WSM Search Engine - Information Retrieval Benchmark & Evaluation")
+    print("=" * 70)
+    docs = loader.load_directory(path)
+    index.build(docs)
+    processor.sync_wildcard_index()
+    print(f"[*] Loaded {len(docs)} documents. Vocabulary: {index.vocabulary_size} terms.\n")
+
+    # Benchmark test queries and ground-truth relevant document IDs
+    benchmarks = [
+        ("inverted index", {1, 3, 6}),
+        ("web crawlers spider", {2}),
+        ("wildcard queries permuterm", {3}),
+        ("tokenization stemming case folding", {4}),
+        ("vector space model tf-idf cosine", {5}),
+        ("boolean retrieval precision recall", {6}),
+    ]
+
+    query_retrieved_lists = []
+    query_ground_truths = []
+
+    print(f"{'Query':<36} | {'P@3':<6} | {'R@3':<6} | {'AP':<6} | {'RR':<6}")
+    print("-" * 70)
+
+    for query_str, relevant_docs in benchmarks:
+        results, _ = processor.search(query_str, mode="ranked")
+        retrieved_ids = [r.doc_id for r in results]
+
+        query_retrieved_lists.append(retrieved_ids)
+        query_ground_truths.append(relevant_docs)
+
+        p3 = Evaluator.precision_at_k(retrieved_ids, relevant_docs, k=3)
+        r3 = Evaluator.recall_at_k(retrieved_ids, relevant_docs, k=3)
+        ap = Evaluator.average_precision(retrieved_ids, relevant_docs)
+        rr = Evaluator.reciprocal_rank(retrieved_ids, relevant_docs)
+
+        print(f"{query_str:<36} | {p3:<6.3f} | {r3:<6.3f} | {ap:<6.3f} | {rr:<6.3f}")
+
+    map_score = Evaluator.mean_average_precision(query_retrieved_lists, query_ground_truths)
+    mrr_score = Evaluator.mean_reciprocal_rank(query_retrieved_lists, query_ground_truths)
+
+    print("-" * 70)
+    print(f"Mean Average Precision (MAP) : {map_score:.4f}")
+    print(f"Mean Reciprocal Rank (MRR)   : {mrr_score:.4f}")
+    print("=" * 70)
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Web Search and Mining (WSM) Information Retrieval Engine")
     parser.add_argument(
@@ -90,6 +154,11 @@ def main() -> None:
         help="Query to search in CLI mode",
     )
     parser.add_argument(
+        "--eval",
+        action="store_true",
+        help="Run Information Retrieval evaluation benchmark (MAP, MRR, P@K, R@K)",
+    )
+    parser.add_argument(
         "--mode",
         "-m",
         type=str,
@@ -99,6 +168,10 @@ def main() -> None:
     )
 
     args = parser.parse_args()
+
+    if args.eval:
+        run_evaluation_benchmark(args.data)
+        return
 
     if args.cli:
         if not args.query:
