@@ -1,0 +1,9 @@
+Boolean retrieval evaluates exact matching of search terms using standard logical operators: AND, OR, and NOT.
+The inverted index facilitates boolean operations by merging postings lists corresponding to query terms.
+An AND operation is computed by intersecting two postings lists, finding documents present in both lists.
+An OR operation computes the union of postings lists, while a NOT operation computes set difference to exclude unwanted documents.
+Search system performance is traditionally evaluated using standard information retrieval metrics.
+Precision measures the proportion of retrieved documents that are truly relevant to the query.
+Recall measures the fraction of all relevant documents in the collection that were successfully retrieved by the search system.
+Other popular evaluation metrics include the F-measure, Mean Average Precision (MAP), and Normalized Discounted Cumulative Gain (NDCG).
+

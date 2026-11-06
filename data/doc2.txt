@@ -1,0 +1,8 @@
+Web mining is the application of data mining techniques to discover patterns from the World Wide Web.
+It can be divided into three categories: web content mining, web structure mining, and web usage mining.
+Web crawlers, also known as web spiders or bots, systematically browse the World Wide Web for the purpose of web indexing.
+Crawlers download web pages by following hyperlinks across websites.
+Hyperlink analysis and graph mining are used in algorithms such as PageRank and HITS to assess the authority and importance of pages.
+Search engines rely heavily on web crawlers to keep their index fresh and comprehensive.
+Data mining and machine learning enhance search result quality by understanding user intent and query patterns.
+

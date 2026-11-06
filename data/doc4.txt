@@ -1,0 +1,8 @@
+Tokenization and text normalization are foundational preprocessing steps in natural language processing and search engines.
+Tokenization breaks a raw sequence of characters into individual terms or tokens, stripping away unwanted punctuation and whitespace.
+Following tokenization, text normalization converts tokens into standardized canonical forms.
+Case folding is a primary normalization step that transforms uppercase letters to lowercase, ensuring that Search and search match the same dictionary entry.
+Other normalization techniques include accent stripping, contraction expansion, and morphological stemming.
+Stemming algorithms, such as the famous Porter Stemmer, strip grammatical suffixes from words like retrieval, retrieved, and retrieving to reduce them to their common stem.
+Stop words filtering removes frequent grammatical words such as the, is, at, which, and on, which contribute little semantic value to general search queries.
+

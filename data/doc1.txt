@@ -1,0 +1,8 @@
+Information Retrieval (IR) is the activity of obtaining information system resources that are relevant to an information need from a collection of those resources.
+Searches can be based on full-text or other content-based indexing.
+An automated information retrieval system is used to reduce what has been called information overload.
+Search engines are the most common application of information retrieval methods.
+In modern search engines, an inverted index is the core data structure enabling ultra-fast full-text searches.
+When a user submits a query, the query processor searches the inverted index to find matching documents.
+Ranking algorithms then sort the results so the most relevant documents appear at the top.
+

@@ -1,0 +1,7 @@
+# Web Search and Mining (WSM) Assignment
+# The core search engine, indexers, wildcard processors, and Tkinter GUI
+# are implemented using Python standard libraries (Zero external dependencies required).
+#
+# Optional test runner / formatting packages for development:
+pytest>=7.0.0
+

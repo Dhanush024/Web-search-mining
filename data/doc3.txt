@@ -1,0 +1,9 @@
+Wildcard queries allow users to search for terms when they are uncertain of the exact spelling or when searching for word variations.
+In a wildcard query, the asterisk symbol represents zero or more arbitrary characters, while a question mark represents a single character.
+Standard inverted indexes cannot efficiently handle leading wildcards such as *mining without scanning the entire lexicon.
+To solve this problem, information retrieval systems construct auxiliary indexes like the permuterm index and k-gram indexes.
+A permuterm index appends a special end-of-word symbol such as dollar to each vocabulary term and stores all cyclic rotations.
+For example, for the word search, rotations include search$, earch$s, arch$se, and $search.
+Queries with wildcards are rotated until the wildcard appears at the end, turning the search into a fast prefix lookup.
+K-gram indexes break words into character sequences of length k to support wildcard matching through set intersections.
+

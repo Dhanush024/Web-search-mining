@@ -1,0 +1,8 @@
+Vector space models represent both documents and user queries as multi-dimensional vectors in a high-dimensional vocabulary space.
+The weight assigned to each term in a document vector is commonly determined by the TF-IDF weighting scheme.
+Term frequency measures how frequently a term appears within a specific document, reflecting local relevance.
+Inverse document frequency attenuates the weight of terms that appear very frequently across the entire collection, emphasizing rare and discriminatory terms.
+To determine document relevance, the search engine computes cosine similarity between the query vector and document vectors.
+Cosine normalization compensates for differences in document length, ensuring long documents do not dominate search results purely due to higher word counts.
+Ranked retrieval returns documents sorted in descending order of their cosine similarity or BM25 relevance scores.
+
